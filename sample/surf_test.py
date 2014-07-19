@@ -1,7 +1,11 @@
+#! /usr/bin/python
+# -*- encoding: utf-8 -*-
+
+
 import cv
 from sys import *
 '''
-引数に画像のパスを指定するとsurfを表示します。
+蠑墓焚縺ｫ逕ｻ蜒上�ｮ繝代せ繧呈欠螳壹☆繧九→surf繧定｡ｨ遉ｺ縺励∪縺吶�
 '''
 im =  cv.LoadImageM(argv[1] , cv.CV_LOAD_IMAGE_GRAYSCALE)
 (keypoints , descriptors) = cv.ExtractSURF(im,
