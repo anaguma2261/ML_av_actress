@@ -1,0 +1,8 @@
+- hosts: webapp
+  roles:
+    - webapp
+  vars:
+    user: team_av
+    user_home: /home/{{ user }}
+    ruby_version: 1.9.3-p448
+  sudo: yes

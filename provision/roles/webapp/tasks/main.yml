@@ -1,0 +1,161 @@
+# Init
+- name: set time to JST
+  file: src=/usr/share/zoneinfo/Asia/Tokyo
+        dest=/etc/localtime
+        owner=root
+        group=root
+        state=link
+        force=yes
+
+- name: set epel
+  yum: name=http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/epel-release-6-5.noarch.rpm state=present
+
+- name: set ius
+  yum: name=http://dl.iuscommunity.org/pub/ius/stable/CentOS/6/x86_64/ius-release-1.0-11.ius.centos6.noarch.rpm state=present
+
+- name: set epel repo default off
+  command: sed -i -e 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+
+- name: set ius repo default off
+  command: sed -i -e 's/enabled=1/enabled=0/g' /etc/yum.repos.d/ius.repo
+
+- name: add the user
+  user: name={{ user }}
+        home={{ user_home }}
+        createhome=yes
+
+- name: install Development Tools
+  action: yum pkg="@Development tools" state=installed
+
+- name: basic packages
+  yum: pkg={{ item }} enablerepo=epel state=installed
+  with_items:
+    - wget
+    - vim-enhanced
+    - bind-utils
+    - telnet
+    - tmux
+    - ntpdate
+    - zlib-devel
+    - bzip2-devel
+    - openssl-devel
+    - ncurses-devel
+    - sqlite-devel
+    - readline-devel
+
+
+
+# ssh and git
+- name: mkdir repos
+  file: path={{ user_home }}/repos
+        owner={{ user }}
+        group={{ user }}
+        state=directory
+
+- name: mkdir .ssh
+  file: path={{ user_home }}/.ssh
+        owner={{ user }}
+        group={{ user }}
+        state=directory
+        mode=0700
+
+# TODO 今回の用途用に GitHub ユーザーを作成する
+- name: copy private key for github
+  copy: src=~/.ssh/tsuda7-github dest={{ user_home }}/.ssh/ owner={{ user }} group={{ user }} mode=0600
+
+- name: copy ssh config
+  copy: src=../files/ssh_config dest={{ user_home }}/.ssh/config owner={{ user }} group={{ user }} mode=0600
+
+- name: install git
+  action: yum pkg=git state=installed
+
+# TODO 今回の用途用に GitHub ユーザーを作成する
+- name: set git user
+  command: git config --global user.name tsuda7
+  sudo_user: {{ user }}
+
+- name: git clone ML_av_actress
+  command: git clone git@github.com:anaguma2261/ML_av_actress.git creates={{ user_home }}/repos/ML_av_actress chdir={{ user_home }}/repos/
+  sudo_user: {{ user }}
+
+
+
+# MySQL
+- name: install mysql mysql-devel
+  yum: name={{ item }}
+  with_items:
+    - mysql
+    - mysql-devel
+
+
+
+# Python
+- name: install python2.7
+  action: yum enablerepo=ius pkg={{ item }} state=installed
+  with_items:
+    - python27
+    - python27-devel
+    - python-devel
+
+- name: setuptools | download setuptools
+  command: wget https://pypi.python.org/packages/source/s/setuptools/setuptools-1.1.6.tar.gz
+           chdir=/tmp/
+           creates=/usr/bin/easy_install
+
+- name: setuptools | uncompress and install setuptools
+  shell: tar zxvf setuptools-1.1.6.tar.gz; cd /tmp/setuptools-1.1.6; /usr/bin/python2.7 setup.py install
+           chdir=/tmp/
+           creates=/usr/bin/easy_install
+
+- name: install pip
+  command: easy_install pip
+           creates=/usr/bin/pip
+
+- name: install pytest pytest-cov python-memcached pycrypto mock boto sqlalchemy paramiko werkzeug requests flask awscli fabric ansible
+  pip: name={{ item }}
+  with_items:
+    - pytest
+    - pytest-cov
+    - python-memcached
+    - pycrypto
+    - mock
+    - boto
+    - sqlalchemy
+    - paramiko
+    - werkzeug
+    - requests
+    - flask
+    - awscli
+    - fabric
+    - ansible
+    - python-daemon
+
+- name: install mysql-python
+  pip: name=mysql-python
+
+
+
+# AWS
+- name: install awscli python-daemon
+  pip: name={{ item }}
+  with_items:
+    - awscli
+    - python-daemon
+  tags: python-daemon
+
+
+
+# chkconfig
+- name: make sure unused services are stopped and disabled
+  service: name={{ item }} state=stopped enabled=no
+  with_items:
+    - auditd
+    - ip6tables
+    - lvm2-monitor
+    - mdmonitor
+    - netfs
+
+- name: make sure important services are running and enabled
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - sendmail
