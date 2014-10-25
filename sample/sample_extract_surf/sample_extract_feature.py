@@ -24,32 +24,23 @@ class SampleExtractFeature(object):
         self.folder_path = folder_path
         self.cluster_num = cluster_num
 
-        map_surf_features = self._extract_surf_features()
-        self.kmeans       = self._calc_kmeans_centroid(map_surf_features)
+        map_surf_features = self._extract_surf_features_for_all_images()
+        self.kmeans = self._calc_kmeans_centroid(map_surf_features)
         self.bags_of_keypoints = { img_id: self._calc_a_bag_of_keypoints(descriptors)
-                                            for img_id, descriptors
-                                             in map_surf_features.items() }
+                                   for img_id, descriptors
+                                    in map_surf_features.items() }
 
-    def _extract_surf_features(self):
-        self.logger.debug("enter")
-        images = glob.glob(self.folder_path + '*.jpg')
+    def _retrieve_image_id(self, img_path):
+        return self.IMG_ID_REGREX.search(img_path).group(1)
 
-        if len(images) == 0:
-            raise Exception("%s has no image file."%sself.folder_path)
+    def _extract_surf_features_for_all_images(self):
+        return { self._retrieve_image_id(img_path): self.extract_surf_features(img_path)
+                 for img_path in glob.glob(self.folder_path + '*.jpg') }
 
-        map_surf_features = {}
-        for img_path in images:
-            image_id = self.IMG_ID_REGREX.search(img_path).group(1)
-            img = cv.LoadImageM(img_path , cv.CV_LOAD_IMAGE_GRAYSCALE)
-
-            #: ハードコーディングすみません 意味をその内調べます。
-            (keypoints, descriptors) = cv.ExtractSURF(img, None,
-                                                       cv.CreateMemStorage(),
-                                                       (1 , 500, 3, 4))
-            map_surf_features[image_id] = descriptors
-        self.logger.debug("exit")
-
-        return map_surf_features
+    def extract_surf_features(self, img_path):
+        img = cv.LoadImageM(img_path, cv.CV_LOAD_IMAGE_GRAYSCALE)
+        _, descriptors = cv.ExtractSURF(img, None, cv.CreateMemStorage(), (1 , 500, 3, 4))
+        return descriptors
 
     def _calc_kmeans_centroid(self, map_surf_features):
         self.logger.debug("enter")
