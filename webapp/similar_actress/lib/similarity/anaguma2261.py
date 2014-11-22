@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lib.similarity.base import Base
+from base import Base
 import pandas
 import numpy
 import cv
@@ -13,7 +13,7 @@ class Similarity(Base):
 
     _BASE_PATH = os.path.dirname(os.path.abspath(__file__))
     KMEANS_OBJECT_PATH = os.path.normpath(os.path.join(_BASE_PATH,
-                                      '../../data/kmeans.pkl'))
+                                      '../../../../data/kmeans.pkl'))
 
 
     def __init__(self):
@@ -35,7 +35,8 @@ class Similarity(Base):
         bag_of_keypoints = self._calc_a_bag_of_keypoints(descriptors)
 
 
-        distance = ((self.pd_feature_data - bag_of_keypoints)**2).sum(axis=1)
+        #distance = ((self.pd_feature_data - bag_of_keypoints)**2).sum(axis=1)
+        distance = ((self.pd_feature_data * bag_of_keypoints)).sum(axis=1)
         distance.sort(ascending=False)
         return distance.index.values[0]
 

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}デモ{% endblock title %}
+
+{% block extrahead %}
+<style>
+table {
+  margin-top: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <h3 class="page-header">デモ</h3>
+
+{{ sim_id }}
+{{ img_id }}
+
+<img src="{% static 'images' %}/{{ sim_id }}.jpg">
+<img src="{% static 'images' %}/{{ img_id }}.jpg">
+{% endblock content %}
