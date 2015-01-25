@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}デモ{% endblock title %}
+
+{% block extrahead %}
+<style>
+table {
+  margin-top: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <h3 class="page-header">デモ</h3>
+
+<form method="post" action="/upload/" enctype="multipart/form-data">
+{% csrf_token %}
+<input type="file" name="target_image">
+<input type="submit" value="送信する">
+
+{% endblock content %}

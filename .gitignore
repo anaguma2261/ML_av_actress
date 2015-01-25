@@ -1,3 +1,4 @@
 *.pyc
 .settings/
 webapp/static/images/
+webapp/static/tmp/

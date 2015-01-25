@@ -7,6 +7,7 @@ from os import path
 import re
 from sklearn.cluster import MiniBatchKMeans
 from logging import getLogger
+import scipy.spatial.distance as distance
 
 class SampleExtractFeature(object):
     '''
@@ -34,22 +35,19 @@ class SampleExtractFeature(object):
         return self.IMG_ID_REGREX.search(img_path).group(1)
 
     def _extract_surf_features_for_all_images(self):
-        return { self._retrieve_image_id(img_path): self.extract_surf_features(img_path)
+        return { self._retrieve_image_id(img_path): self._extract_surf_features(img_path)
                  for img_path in glob.glob(self.folder_path + '*.jpg') }
 
-    def extract_surf_features(self, img_path):
+    def _extract_surf_features(self, img_path):
         img = cv.LoadImageM(img_path, cv.CV_LOAD_IMAGE_GRAYSCALE)
         _, descriptors = cv.ExtractSURF(img, None, cv.CreateMemStorage(), (1 , 500, 3, 4))
         return descriptors
 
     def _calc_kmeans_centroid(self, map_surf_features):
-        self.logger.debug("enter")
-
         image_data = []
         for surf_feature in map_surf_features.values():
             image_data += surf_feature
         image_data = numpy.array(image_data)
-        #print image_data
         """
         centroid, label = kmeans2(image_data,
                                   k=self.cluster_num,
@@ -61,7 +59,6 @@ class SampleExtractFeature(object):
 
         label = kmeans.fit_predict(image_data)
         centroid = kmeans.cluster_centers_
-        self.logger.debug("exit")
 
         return kmeans
 
@@ -74,9 +71,14 @@ class SampleExtractFeature(object):
         bag_of_keypoints /= len(descriptors)
         return bag_of_keypoints
 
-    def to_csv(self, csv_path):
-        self.logger.debug("enter")
+    def get_nearest_actresses(self, img_path, limit=3):
+        the_descriptors = self._extract_surf_features(img_path)
+        the_b_of_k = self._calc_a_bag_of_keypoints(the_descriptors)
+        sorted_bs_of_k = sorted(self.bags_of_keypoints.items(),
+                                cmp=lambda x,y: cmp(distance.cosine(x[1], the_b_of_k), distance.cosine(y[1], the_b_of_k)))
+        return [ b_of_k[0] for b_of_k in sorted_bs_of_k[0:limit] ]
 
+    def to_csv(self, csv_path):
         with open(csv_path, "w") as f:
             f.write("img_id,")
             f.write(",".join(["feature_%s"%i for i in xrange(self.cluster_num)]))
@@ -86,5 +88,3 @@ class SampleExtractFeature(object):
                 f.write(str(img_id)+",")
                 f.write(",".join(map(str, bag_of_keypoints)))
                 f.write("\n")
-
-        self.logger.debug("exit")
