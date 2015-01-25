@@ -1,22 +1,40 @@
-{% extends "base.html" %}
-{% load staticfiles %}
+{% extends "base.html" %} {% load staticfiles %}
 
 {% block title %}デモ{% endblock title %}
 
 {% block extrahead %}
-<style>
-table {
-  margin-top: 8px;
-}
-</style>
 {% endblock %}
 
 {% block content %}
-    <h3 class="page-header">デモ</h3>
 
-{{ sim_id }}
-{{ img_id }}
 
-<img src="{% static 'images' %}/{{ sim_id }}.jpg">
-<img src="{% static 'images' %}/{{ img_id }}.jpg">
+<div style="float:left;">
+<h3 class="page-header">対象画像</h3>
+
+{% if img_id %}
+<img src="{% static 'images' %}/{{ img_id }}.jpg" />
+{% endif %}
+
+{% if upload %}
+<img src="{{ upload }}" width=200 />
+{% endif %}
+</div>
+
+
+<div style="float:left; margin-left: 30px;">
+<h3 class="page-header">類似画像</h3>
+
+<p>
+{% for sim_id in sim_ids %}
+  <span style="margin: 10px;">
+    <img src="{% static 'images' %}/{{ sim_id }}.jpg" />
+  </span>
+  {% if forloop.counter|divisibleby:"5" %}
+      </p><p>
+  {% endif%}
+{% endfor %}
+</p>
+</div>
+
+
 {% endblock content %}
