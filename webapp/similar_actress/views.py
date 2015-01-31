@@ -28,7 +28,7 @@ def upload(request):
     if request.method == "POST":
 
         file = request.FILES['target_image']
-        path = default_storage.save('static/tmp/i', ContentFile(file.read())) 
+        path = default_storage.save('static/tmp/i', ContentFile(file.read()))
 
         sm = Similarity()
         sim_ids = sm.get_similar_actresses(path)
