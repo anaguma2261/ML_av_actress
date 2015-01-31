@@ -24,16 +24,25 @@
 <div style="float:left; margin-left: 30px;">
 <h3 class="page-header">類似画像</h3>
 
-<p>
-{% for sim_id in sim_ids %}
-  <span style="margin: 10px;">
-    <img src="{% static 'images' %}/{{ sim_id }}.jpg" />
-  </span>
-  {% if forloop.counter|divisibleby:"5" %}
-      </p><p>
-  {% endif%}
+{% for sim_id, value in prof_dict.items %}
+<table>
+  <tr>
+    <td>
+      <img src="{% static 'images' %}/{{ sim_id }}.jpg" />
+    </td>
+    <td style="margin:10px;" width=500>
+      <p style="font-size:9px;">　名前：{{ value.0 }}</p>
+      <p style="font-size:9px;">　生年月日：{{ value.1 }}</p>
+      <p style="font-size:9px;">　星座：{{ value.2 }}</p>
+      <p style="font-size:9px;">　血液型：{{ value.3 }}</p>
+      <p style="font-size:9px;">　バスト{{ value.4 }}</p>
+      <p style="font-size:9px;">　出身地：{{ value.5 }}</p>
+      <p style="font-size:9px;">　趣味：{{ value.6 }}</p>
+      <hr />
+    </td>
+  </tr>
+</table>
 {% endfor %}
-</p>
 </div>
 
 

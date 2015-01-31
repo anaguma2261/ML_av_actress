@@ -41,7 +41,6 @@ class Similarity(Base):
         distance = ((self.pd_feature_data * bag_of_keypoints)).sum(axis=1)
         distance.sort(ascending=False)
 
-        print distance
         return distance.index.values[0:10]
 
     def _calc_a_bag_of_keypoints(self, descriptors):
