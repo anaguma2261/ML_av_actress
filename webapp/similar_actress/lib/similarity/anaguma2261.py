@@ -35,11 +35,11 @@ class Similarity(Base):
         bag_of_keypoints = self._calc_a_bag_of_keypoints(descriptors)
 
 
-        #distance = ((self.pd_feature_data - bag_of_keypoints)**2).sum(axis=1)
-        #distance.sort(ascending=True)
+        distance = ((self.pd_feature_data - bag_of_keypoints)**2).sum(axis=1)
+        distance.sort(ascending=True)
 
-        distance = ((self.pd_feature_data * bag_of_keypoints)).sum(axis=1)
-        distance.sort(ascending=False)
+        # distance = ((self.pd_feature_data * bag_of_keypoints)).sum(axis=1)
+        # distance.sort(ascending=False)
 
         return distance.index.values[0:10]
 
